@@ -17,3 +17,4 @@ https://youtu.be/iz7oAK8NEG0
 ## Authors
 
 - [@obaduca](https://www.github.com/obaduca)
+- Discord: osiwis
