@@ -6,19 +6,20 @@
 #define WM_TRAYICON (WM_USER + 1)
 #define ID_TRAY_EXIT_CONTEXT_MENU_ITEM 2
 
-
 bool mouseSaved = false;
 POINT savedPoint;
 NOTIFYICONDATA nid = {};
 HWND robloxWindow = NULL;
 
-
-bool IsRobloxActive() {
+bool IsRobloxActive()
+{
     HWND foreground = GetForegroundWindow();
-    if (foreground) {
+    if (foreground)
+    {
         char windowTitle[256];
         GetWindowText(foreground, windowTitle, sizeof(windowTitle));
-        if (strcmp(windowTitle, "Roblox") == 0) {
+        if (strcmp(windowTitle, "Roblox") == 0)
+        {
             robloxWindow = foreground;
             return true;
         }
@@ -27,34 +28,55 @@ bool IsRobloxActive() {
     return false;
 }
 
+int GetScaledTitleBarHeight() {
+    const int referenceHeight = 1080;
+    const int referenceTitleBarHeight = 40; 
 
-void ConstrainCursorToRoblox() {
-    if (!robloxWindow) return;
+    HDC screen = GetDC(0);
+    int currentHeight = GetDeviceCaps(screen, VERTRES);
+    ReleaseDC(0, screen);
+
+    float scaleFactor = (float)currentHeight / referenceHeight;
+
+    return (int)(referenceTitleBarHeight * scaleFactor);
+}
+
+void ConstrainCursorToRoblox()
+{
+    if (!robloxWindow)
+        return;
+
     RECT clientRect;
-    if (GetClientRect(robloxWindow, &clientRect)) {
-        POINT topLeft = { clientRect.left, clientRect.top };
-        POINT bottomRight = { clientRect.right, clientRect.bottom };
+    if (GetClientRect(robloxWindow, &clientRect))
+    {
+        POINT topLeft = {clientRect.left, clientRect.top};
+        POINT bottomRight = {clientRect.right, clientRect.bottom};
 
         ClientToScreen(robloxWindow, &topLeft);
         ClientToScreen(robloxWindow, &bottomRight);
 
-        RECT screenRect = { topLeft.x, topLeft.y, bottomRight.x, bottomRight.y };
+        int titleBarHeight = GetScaledTitleBarHeight();
+        topLeft.y += titleBarHeight;
+
+        RECT screenRect = {topLeft.x, topLeft.y, bottomRight.x, bottomRight.y};
         ClipCursor(&screenRect);
     }
 }
 
-
-
-void FreeCursor() {
+void FreeCursor()
+{
     ClipCursor(NULL);
 }
 
-
-LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
     std::cout << "Mouse Hook triggered. Event: " << wParam << std::endl;
-    if (nCode == HC_ACTION) {
-        if (IsRobloxActive()) {
-            switch (wParam) {
+    if (nCode == HC_ACTION)
+    {
+        if (IsRobloxActive())
+        {
+            switch (wParam)
+            {
             case WM_RBUTTONDOWN:
                 mouseSaved = true;
                 GetCursorPos(&savedPoint);
@@ -62,7 +84,8 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 break;
 
             case WM_RBUTTONUP:
-                if (mouseSaved) {
+                if (mouseSaved)
+                {
                     SetCursorPos(savedPoint.x, savedPoint.y);
                     std::cout << "Mouse position reset to saved position.\n";
                     mouseSaved = false;
@@ -73,23 +96,29 @@ LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
                 ConstrainCursorToRoblox();
                 break;
             }
-        } else {
+        }
+        else
+        {
             FreeCursor();
         }
     }
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch (uMsg) {
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch (uMsg)
+    {
     case WM_TRAYICON:
-        if (lParam == WM_RBUTTONUP) {
+        if (lParam == WM_RBUTTONUP)
+        {
             POINT curPoint;
             GetCursorPos(&curPoint);
             SetForegroundWindow(hwnd);
 
             HMENU hMenu = CreatePopupMenu();
-            if (hMenu) {
+            if (hMenu)
+            {
                 InsertMenu(hMenu, -1, MF_BYPOSITION, ID_TRAY_EXIT_CONTEXT_MENU_ITEM, "Quit");
 
                 TrackPopupMenu(hMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, curPoint.x, curPoint.y, 0, hwnd, NULL);
@@ -99,7 +128,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         return 0;
 
     case WM_COMMAND:
-        if (LOWORD(wParam) == ID_TRAY_EXIT_CONTEXT_MENU_ITEM) {
+        if (LOWORD(wParam) == ID_TRAY_EXIT_CONTEXT_MENU_ITEM)
+        {
             PostQuitMessage(0);
         }
         return 0;
@@ -109,8 +139,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     }
 }
 
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int cmdShow) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int cmdShow)
+{
     const char CLASS_NAME[] = "Sample Window Class";
 
     WNDCLASS wc = {};
@@ -129,10 +159,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int cmdShow) {
         NULL,
         NULL,
         hInstance,
-        NULL
-    );
+        NULL);
 
-    if (hwnd == NULL) {
+    if (hwnd == NULL)
+    {
         return 0;
     }
 
@@ -147,12 +177,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int cmdShow) {
     Shell_NotifyIcon(NIM_ADD, &nid);
 
     HHOOK mouseHook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
-    if (!mouseHook) {
+    if (!mouseHook)
+    {
         return 1;
     }
 
     MSG msg = {};
-    while (GetMessage(&msg, NULL, 0, 0)) {
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
