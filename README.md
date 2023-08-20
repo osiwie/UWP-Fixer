@@ -1,6 +1,7 @@
 # UWP-Fixer
 
 **For optimal performance, it's advised to play Roblox in windowed mode while using this utility.**
+
 This utility addresses issues specific to the Roblox UWP version available on the Windows Store. It mainly focuses on correcting mouse behaviors, ensuring smoother gameplay.
 
 ## Features
