@@ -10,19 +10,26 @@
 bool mouseSaved = false;
 POINT savedPoint;
 NOTIFYICONDATA nid = {};
+HWND robloxWindow = NULL;
+
 
 bool IsRobloxActive() {
     HWND foreground = GetForegroundWindow();
     if (foreground) {
         char windowTitle[256];
         GetWindowText(foreground, windowTitle, sizeof(windowTitle));
-        return (strstr(windowTitle, "Roblox") != NULL);
+        if (strcmp(windowTitle, "Roblox") == 0) {
+            robloxWindow = foreground;
+            return true;
+        }
     }
+    robloxWindow = NULL;
     return false;
 }
 
+
 void ConstrainCursorToRoblox() {
-    HWND robloxWindow = GetForegroundWindow();
+    if (!robloxWindow) return;
     RECT clientRect;
     if (GetClientRect(robloxWindow, &clientRect)) {
         POINT topLeft = { clientRect.left, clientRect.top };
@@ -37,12 +44,14 @@ void ConstrainCursorToRoblox() {
 }
 
 
+
 void FreeCursor() {
     ClipCursor(NULL);
 }
 
 
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
+    std::cout << "Mouse Hook triggered. Event: " << wParam << std::endl;
     if (nCode == HC_ACTION) {
         if (IsRobloxActive()) {
             switch (wParam) {
@@ -133,7 +142,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int cmdShow) {
     nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
     nid.uCallbackMessage = WM_TRAYICON;
     nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    strcpy(nid.szTip, "Roblox Mouse Fixer");
+    strcpy(nid.szTip, "UWPFixer - by Osiris");
 
     Shell_NotifyIcon(NIM_ADD, &nid);
 
