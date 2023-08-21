@@ -1,4 +1,4 @@
-# UWP-Fixer
+![image](https://github.com/obaduca/UWP-Fixer/assets/113936837/006a8a21-e936-4560-ab0f-f503095ce5f4)# UWP-Fixer
 
 **For optimal performance, it's advised to play Roblox in windowed mode while using this utility.**
 
@@ -14,6 +14,13 @@ This utility addresses issues specific to the Roblox UWP version available on th
 ## Installation
 
 Download the latest release from the [GitHub releases page](https://github.com/obaduca/UWP-Fixer/releases).
+
+**OR**
+
+Compile it with G++
+``g++ -o UWP-Fixer .\uwp-fixes.cpp -lcomctl32 -mwindows -static-libgcc -static-libstdc++ -lgdi32``
+
+
 ## Demo
 
 https://youtu.be/iz7oAK8NEG0
