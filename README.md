@@ -1,4 +1,4 @@
-![image](https://github.com/obaduca/UWP-Fixer/assets/113936837/006a8a21-e936-4560-ab0f-f503095ce5f4)# UWP-Fixer
+# UWP-Fixer
 
 **For optimal performance, it's advised to play Roblox in windowed mode while using this utility.**
 
